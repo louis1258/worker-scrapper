@@ -1,0 +1,15 @@
+{
+  "name": "comic-scraper",
+  "version": "1.0.0",
+  "description": "feature web scaper data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "nghiahothanh",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^23.5.3"
+  }
+}
