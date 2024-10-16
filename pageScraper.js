@@ -1,50 +1,68 @@
+
 const scraperObject = {
-    url: 'http://books.toscrape.com',
-    async scraper(browser){
+    url: 'https://truyenqqto.com',
+    async scraper(browser) {
         let page = await browser.newPage();
-		console.log(`Navigating to ${this.url}...`);
-		// Navigate to the selected page
-		await page.goto(this.url);
-		// Wait for the required DOM to be rendered
-		await page.waitForSelector('.page_inner');
-		// Get the link to all the required books
-		let urls = await page.$$eval('section ol > li', links => {
-			// Make sure the book to be scraped is in stock
-			links = links.filter(link => link.querySelector('.instock.availability > i').textContent !== "In stock")
-			// Extract the links from the data
-			links = links.map(el => el.querySelector('h3 > a').href)
-			return links;
-		});
+        console.log(`Navigating to ${this.url}...`);
+        let urls;
 
+        try {
+            await page.goto(this.url, { waitUntil: 'networkidle2' });
 
-        // Loop through each of those links, open a new page instance and get the relevant data from them
-		let pagePromise = (link) => new Promise(async(resolve, reject) => {
-			let dataObj = {};
-			let newPage = await browser.newPage();
-			await newPage.goto(link);
-			dataObj['bookTitle'] = await newPage.$eval('.product_main > h1', text => text.textContent);
-			dataObj['bookPrice'] = await newPage.$eval('.price_color', text => text.textContent);
-			dataObj['noAvailable'] = await newPage.$eval('.instock.availability', text => {
-				// Strip new line and tab spaces
-				text = text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, "");
-				// Get the number of stock available
-				let regexp = /^.*\((.*)\).*$/i;
-				let stockAvailable = regexp.exec(text)[1].split(' ')[0];
-				return stockAvailable;
-			});
-			dataObj['imageUrl'] = await newPage.$eval('#product_gallery img', img => img.src);
-			dataObj['bookDescription'] = await newPage.$eval('#product_description', div => div.nextSibling.nextSibling.textContent);
-			dataObj['upc'] = await newPage.$eval('.table.table-striped > tbody > tr > td', table => table.textContent);
-			resolve(dataObj);
-			await newPage.close();
-		});
+            // Wait for the list to load
+            await page.waitForSelector('#list_new');
 
-		for(link in urls){
-			let currentPageData = await pagePromise(urls[link]);
-			// scrapedData.push(currentPageData);
-			console.log(currentPageData);
-		}
+            // Scrape all hrefs inside the a tags within the li elements
+            urls = await page.$$eval('#list_new li .book_avatar a', links => {
+                return links.map(link => link.href);  // Extract href attribute
+            });
 
+            console.log('Scraped hrefs:', urls);
+        } catch (error) {
+            console.error(`Error during scraping:`, error);
+        } finally {
+            await page.close(); // Close the main page after scraping
+        }
+   
+        // Loop through each of those links, open a new page instance, and get the relevant data
+        let pagePromise = (link) => new Promise(async (resolve, reject) => {
+            console.log(link, 'link');
+            let dataObj = {};
+            try {
+                let newPage = await browser.newPage();
+                await newPage.goto(link);
+                await newPage.waitForSelector('.book_detail > .story-detail-info.detail-content > p'); // Tăng thời gian chờ lên 60 giây
+
+                // Scrape the title or any other details from the individual book page
+                dataObj['avatar'] = await newPage.$eval('.book_detail > .book_info > .book_avatar > img', img => img.src);
+                dataObj['title'] = await newPage.$eval('.book_detail > .book_info > .book_other > h1', title => title.textContent);
+                dataObj['genres'] = await newPage.$$eval('.book_detail > .book_info > .book_other > .list01 .li03 > a', genres => {
+                    return genres.map(genre => genre.textContent.trim());  // Extract and trim the text content of each genre
+                });
+                await newPage.waitForSelector('.book_detail >.story-detail-info.detail-content > p');
+                dataObj['description'] = await newPage.$eval('.book_detail >.story-detail-info.detail-content > p', description => description.textContent);
+                // Other scraping logic here (like price, description, etc.)
+
+                await newPage.close();
+                resolve(dataObj);
+            } catch (err) {
+                reject(err);
+            }
+        })
+        let scrapedData = [];
+
+        // Loop through all the URLs and fetch data from each
+        for (let link of urls) {
+            try {
+                let currentPageData = await pagePromise(link);
+                scrapedData.push(currentPageData);
+                console.log(currentPageData);
+            } catch (error) {
+                console.error(`Error scraping link: ${link}`, error);
+            }
+        }
+        // After all scraping is done, close the browser
+        await browser.close();
     }
 }
 
