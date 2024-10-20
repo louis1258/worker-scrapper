@@ -10,6 +10,9 @@
   "author": "nghiahothanh",
   "license": "ISC",
   "dependencies": {
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
+    "path": "^0.12.7",
     "puppeteer": "^23.5.3",
     "puppeteer-core": "^23.5.3",
     "puppeteer-extra": "^3.3.6",
