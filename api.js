@@ -18,7 +18,7 @@ const upload = (image) => {
     const config = {
         headers: {
             'Content-Type': `multipart/form-data`,  // Axios handles the boundary automatically
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTcyOTQ0MTg3OSwiZXhwIjoxNzI5NTI4Mjc5fQ.8kqT-lA7wkcHZJSBunNF5nYbtlwwwF2MNqCF84lou_g`,  // Add your token here if needed
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTcyOTU3OTI3NSwiZXhwIjoxNzI5NjY1Njc1fQ.TYPhn83dcg_NRVcERVNfQJ7P2J7d2lvgDNxWLRQ3lD4`,  // Add your token here if needed
             ...formData.getHeaders(),  // Automatically set the multipart headers
         },
         timeout: 60000  
@@ -46,5 +46,25 @@ const upload = (image) => {
         });
 };
 
+const COMIC_URL = 'http://localhost:9000/api/comics';
+const createComic =  (comic) =>{
+    const config = {
+        headers: {
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTcyOTU3OTI3NSwiZXhwIjoxNzI5NjY1Njc1fQ.TYPhn83dcg_NRVcERVNfQJ7P2J7d2lvgDNxWLRQ3lD4`,  // Add your token here if needed
+        },
+        timeout: 60000  
+    };
+
+    return axios.post(COMIC_URL, comic, config)
+    .then(response => {
+        return response.data;  // Trả về data từ response
+    })
+    .catch(error => {
+        console.error('Error uploading comic:', error);
+        throw error;  // Ném lỗi ra ngoài để xử lý ở nơi gọi hàm
+    });
+
+}
+
 // Export the function using CommonJS
-module.exports = { upload };
+module.exports = { upload , createComic};
