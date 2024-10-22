@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const axios = require('axios');
+const { upload } = require("./api");
 const scraperObject = {
     url: 'https://truyenqqto.com',
     async scraper(browser) {
@@ -77,7 +78,12 @@ const scraperObject = {
                 // Fetch chapter content
                 for (const chapter of dataObj['chapter']) {
                     console.log(chapter);
-                    await newPage.goto(chapter.link,{ waitUntil: 'domcontentloaded', timeout: 10000 });
+                    try {
+                        await newPage.goto(chapter.link, { waitUntil: 'networkidle2', timeout: 20000 });
+                    } catch (error) {
+                        console.error(`Failed to load ${chapter.link}:`, error);
+                        continue; // Skip to the next chapter
+                    }
                     // const checkChapter = await waitForElement(newPage, '.page-chapter img.lazy');
 
                     // dataObj['images'] = await newPage.$$eval('.page-chapter img.lazy', images => {
@@ -105,11 +111,9 @@ const scraperObject = {
                                         reader.readAsDataURL(blob);
                                     });
                                 } catch (error) {
-                                    console.error('Error fetching image:', error);
                                     return null;
                                 }
                             } else {
-                                console.log('Không tìm thấy ảnh.');
                                 return null;
                             }
                         });
@@ -119,7 +123,7 @@ const scraperObject = {
                         return images.filter(img => img !== null); // Filter out null results
                     });
                 
-                    dataObj['images'].forEach((base64String, index) => {
+                    dataObj['images'].forEach(async (base64String, index) => {
                         if (base64String) {
                             // Extract the image format (jpeg/png) from the base64 string
                             const match = base64String.match(/^data:image\/(png|jpeg);base64,(.+)$/);
@@ -133,10 +137,17 @@ const scraperObject = {
                 
                                 // Save the image to the filesystem
                                 fs.writeFileSync(filePath, buffer);
+                                
+                                if(index!=0){
+                                    setTimeout(async()=>{
+                                        const url = await upload(`image_${index}.${ext}`);
+                                        return url;
+                                    },1000)
+                                }
                             }
                         }
                     });
-                   
+                   console.log(dataObj['images'],'dataObj');
                     // await newPage.close();
                 }
 

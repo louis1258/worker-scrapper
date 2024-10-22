@@ -10,6 +10,7 @@
   "author": "nghiahothanh",
   "license": "ISC",
   "dependencies": {
+    "amqplib": "^0.10.4",
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
     "path": "^0.12.7",
