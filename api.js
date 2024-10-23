@@ -21,7 +21,7 @@ const upload = (image) => {
             'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTcyOTU3OTI3NSwiZXhwIjoxNzI5NjY1Njc1fQ.TYPhn83dcg_NRVcERVNfQJ7P2J7d2lvgDNxWLRQ3lD4`,  // Add your token here if needed
             ...formData.getHeaders(),  // Automatically set the multipart headers
         },
-        timeout: 60000  
+        timeout: 60000
     };
 
     // Perform the image upload
@@ -47,15 +47,35 @@ const upload = (image) => {
 };
 
 const COMIC_URL = 'http://localhost:9000/api/comics';
-const createComic =  (comic) =>{
+const createComic = (comic) => {
     const config = {
         headers: {
             'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTcyOTU3OTI3NSwiZXhwIjoxNzI5NjY1Njc1fQ.TYPhn83dcg_NRVcERVNfQJ7P2J7d2lvgDNxWLRQ3lD4`,  // Add your token here if needed
         },
-        timeout: 60000  
+        timeout: 60000
     };
 
     return axios.post(COMIC_URL, comic, config)
+        .then(response => {
+            return response.data;  // Trả về data từ response
+        })
+        .catch(error => {
+            console.error('Error uploading comic:', error);
+            throw error;  // Ném lỗi ra ngoài để xử lý ở nơi gọi hàm
+        });
+
+}
+
+
+const CHAPTER_URL = 'http://localhost:9000/api/chapters';
+const createChapter = (chapter) => {
+    const config = {
+        headers: {
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY`
+        },
+        timeout: 60000
+    }
+    return axios.post(CHAPTER_URL, chapter, config)
     .then(response => {
         return response.data;  // Trả về data từ response
     })
@@ -63,8 +83,6 @@ const createComic =  (comic) =>{
         console.error('Error uploading comic:', error);
         throw error;  // Ném lỗi ra ngoài để xử lý ở nơi gọi hàm
     });
-
 }
-
 // Export the function using CommonJS
-module.exports = { upload , createComic};
+module.exports = { upload, createComic,createChapter };

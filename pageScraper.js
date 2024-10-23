@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const axios = require('axios');
-const { upload, createComic } = require("./api");
+const { upload, createComic, createChapter } = require("./api");
 const createSlug = require("./utils/slug");
 const scraperObject = {
     url: 'https://truyenqqto.com',
@@ -39,7 +39,7 @@ const scraperObject = {
             let dataObj = {};
             const newPage = await browser.newPage();
             try {
-                await newPage.goto(link);
+                await newPage.goto(link, { waitUntil: 'networkidle2' });
                 // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
 
                 // if (ads) {
@@ -53,17 +53,17 @@ const scraperObject = {
                 dataObj['coverImage'] = await newPage.evaluate(async () => {
                     const img = document.querySelector('.book_detail > .book_info > .book_avatar > img');
                     const src = img ? img.src : null;
-                
+
                     if (!src) {
                         console.error('Cover image not found');
                         return null;
                     }
-                
+
                     try {
                         // Fetch the image as a blob
                         const response = await fetch(src);
                         const blob = await response.blob();
-                
+
                         // Convert blob to base64
                         const base64String = await new Promise((resolve, reject) => {
                             const reader = new FileReader();
@@ -71,14 +71,14 @@ const scraperObject = {
                             reader.onerror = reject;
                             reader.readAsDataURL(blob);
                         });
-                
+
                         return base64String; // Return the base64 string to Node.js context
                     } catch (error) {
                         console.error('Error fetching or processing the image:', error);
                         return null;
                     }
                 });
-                
+
                 // Now that you have the base64 string in `dataObj['coverImage']`, save it and upload
                 if (dataObj['coverImage']) {
                     // Extract the image format (jpeg/png) from the base64 string
@@ -111,8 +111,8 @@ const scraperObject = {
 
                 // Scrape chapters
                 dataObj.slug = createSlug(dataObj.title)
-                const result = await createComic(dataObj);
-                console.log('Comic created:', result);
+                const resultComic = await createComic(dataObj);
+                console.log('Comic created:', resultComic);
 
                 const checkChapter = await waitForElement(newPage, 'body > div.content > div.div_middle > div.main_content > div.book_detail > div.list_chapter > div');
 
@@ -130,7 +130,7 @@ const scraperObject = {
                 });
 
                 // Fetch chapter content
-                for (const chapter of dataObj['chapter']) {
+                for (const chapter of dataObj['chapter'].reverse()) {
                     console.log(chapter);
                     try {
                         await newPage.goto(chapter.link, { waitUntil: 'networkidle2', timeout: 20000 });
@@ -201,7 +201,16 @@ const scraperObject = {
                             }
                         }
                     });
-                    console.log(dataObj['images'], 'dataObj');
+                    const chapterData = {
+                        comic: `${resultComic._id}`,
+                        order: 1,
+                        title: `${resultComic.title} - ${chapter.title}`,
+                        images: dataObj['images']
+                        
+
+                    }
+                    const chapterCreate = await createChapter(chapterData);
+                    console.log('chapterCreate:', chapterCreate);
                     // await newPage.close();
                 }
 
