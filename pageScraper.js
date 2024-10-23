@@ -27,18 +27,32 @@ const scraperObject = {
             });
             urls = urls.concat(url)
             await page.goto(urlRedirect, { waitUntil: 'networkidle2' });
-            // await page.waitForSelector('#main_homepage > div.page_redirect');
-            // const totalpage = await page.$$eval('#main_homepage > div.page_redirect > a', links => {
-            //     return links.map(link => link.href);  // Extract href attribute
-            // });
-            console.log(totalpage.length );
+            const maxPageNumber = await page.$$eval('#main_homepage > div.page_redirect > a', links => {
+                const pageNumbers = links.map(link => {
+                    const href = link.href;
+                    const match = href.match(/trang-(\d+)\.html/);  // Extract the page number from the href
+                    return match ? parseInt(match[1]) : null;
+                }).filter(num => num !== null);  // Filter out null values
+                return Math.max(...pageNumbers);  // Return the highest page number
+            });
+            
+            console.log(`Max page number detected: ${maxPageNumber}`);
+            let i =2 
+            while(i<316){
+                const url = `https://truyenqqto.com/truyen-moi-cap-nhat/trang-${i}.html`
+                await page.goto(url, { waitUntil: 'networkidle2' });
+                 await page.waitForSelector('#main_homepage > div.list_grid_out > ul > li > div.book_avatar > a')
+                const totalpage = await page.$$eval('#main_homepage > div.list_grid_out > ul > li > div.book_avatar > a', links => {
+                    return links.map(link => link.href);  // Extract href attribute
+                });
+                urls = urls.concat(totalpage);
+                i ++ ;
+            }
             await page.waitForSelector('#main_homepage > div.list_grid_out > ul');
             const newUrls = await page.$$eval('#main_homepage > div.list_grid_out > ul > li > div.book_avatar > a ', links => {
                 return links.map(link => link.href);  // Extract href attribute
             });
             urls = urls.concat(newUrls);
-            
-            
 
         } catch (error) {
             console.error(`Error during scraping:`, error);
