@@ -3,14 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const axios = require('axios');
-const { upload, createComic, createChapter } = require("./api");
+const { upload, createComic, createChapter, createComicType } = require("./api");
 const createSlug = require("./utils/slug");
 const scraperObject = {
     url: 'https://truyenqqto.com',
     async scraper(browser) {
         let page = await browser.newPage();
         console.log(`Navigating to ${this.url}...`);
-        let urls;
+        let urls = [];
+        const urlRedirect = 'https://truyenqqto.com/truyen-moi-cap-nhat/trang-2.html'
         const navigationPromise = page.waitForNavigation({ waitUntil: "domcontentloaded" });
 
         try {
@@ -21,16 +22,31 @@ const scraperObject = {
             await page.waitForSelector('#list_new');
 
             // Scrape all hrefs inside the a tags within the li elements
-            urls = await page.$$eval('#list_new li .book_avatar a', links => {
+            const url = await page.$$eval('#list_new li .book_avatar a', links => {
                 return links.map(link => link.href);  // Extract href attribute
             });
+            urls = urls.concat(url)
+            await page.goto(urlRedirect, { waitUntil: 'networkidle2' });
+            // await page.waitForSelector('#main_homepage > div.page_redirect');
+            // const totalpage = await page.$$eval('#main_homepage > div.page_redirect > a', links => {
+            //     return links.map(link => link.href);  // Extract href attribute
+            // });
+            console.log(totalpage.length );
+            await page.waitForSelector('#main_homepage > div.list_grid_out > ul');
+            const newUrls = await page.$$eval('#main_homepage > div.list_grid_out > ul > li > div.book_avatar > a ', links => {
+                return links.map(link => link.href);  // Extract href attribute
+            });
+            urls = urls.concat(newUrls);
+            
+            
 
-            console.log('Scraped hrefs:', urls);
         } catch (error) {
             console.error(`Error during scraping:`, error);
         } finally {
             await page.close(); // Close the main page after scraping
         }
+
+
 
         // Loop through each of those links, open a new page instance, and get the relevant data
         let pagePromise = async (link) => {
@@ -103,12 +119,32 @@ const scraperObject = {
                     return genres.map(genre => genre.textContent.trim());  // Extract and trim the text content of each genre
                 });
 
+                const dataComicType = {
+                    name: 'Truyện tranh',
+                    description: "Thể loại có nội dung trong sáng và cảm động, thường có các tình tiết gây cười, các xung đột nhẹ nhàng",
+                    status: "Active",
+                }
+                const typeComicArray = await Promise.all(
+                    dataObj['genres'].map(async (type) => {
+                        dataComicType.name = type;
+                        const typeComic = await createComicType(dataComicType);
+                        return typeComic[0]._id; // Trả về _id của ComicType
+                    })
+                );
+                
+                dataObj['genres'] = typeComicArray
                 const check = await waitForElement(newPage, '.book_detail > .story-detail-info.detail-content');
                 dataObj['description'] = await newPage.evaluate(() => {
                     const checkInner = document.querySelector('body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content.readmore-js-section.readmore-js-collapsed > p');
-                    return checkInner ? checkInner.textContent.trim() : '';
+                    if (checkInner)
+                        return checkInner.textContent.trim();
+                    else {
+                        const checkOuter = document.querySelector('body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content > p')
+                        return checkOuter.textContent.trim();
+                    }
                 });
 
+                console.log(dataObj['description']);
                 // Scrape chapters
                 dataObj.slug = createSlug(dataObj.title)
                 const resultComic = await createComic(dataObj);
@@ -130,7 +166,7 @@ const scraperObject = {
                 });
 
                 // Fetch chapter content
-                for (const chapter of dataObj['chapter'].reverse()) {
+                for (const [index, chapter] of dataObj['chapter'].reverse().entries()) {
                     console.log(chapter);
                     try {
                         await newPage.goto(chapter.link, { waitUntil: 'networkidle2', timeout: 20000 });
@@ -177,40 +213,64 @@ const scraperObject = {
                         return images.filter(img => img !== null); // Filter out null results
                     });
 
-                    dataObj['images'].forEach(async (base64String, index) => {
-                        if (base64String) {
-                            // Extract the image format (jpeg/png) from the base64 string
-                            const match = base64String.match(/^data:image\/(png|jpeg);base64,(.+)$/);
-                            if (match) {
-                                const ext = match[1];  // Image format
-                                const data = match[2]; // Base64 data
-                                const buffer = Buffer.from(data, 'base64');
-
-                                // Create the file path
-                                const filePath = path.join(__dirname, `image_${index}.${ext}`);
-
-                                // Save the image to the filesystem
-                                fs.writeFileSync(filePath, buffer);
-
-                                if (index != 0) {
-                                    setTimeout(async () => {
-                                        const url = await upload(`image_${index}.${ext}`);
-                                        return url;
-                                    }, 1000)
-                                }
-                            }
-                        }
-                    });
                     const chapterData = {
                         comic: `${resultComic._id}`,
-                        order: 1,
+                        order: index ,
                         title: `${resultComic.title} - ${chapter.title}`,
-                        images: dataObj['images']
-                        
-
+                        images: []
                     }
+                    // dataObj['images'].forEach(async (base64String, index) => {
+                    //     if (base64String) {
+                    //         // Extract the image format (jpeg/png) from the base64 string
+                    //         const match = base64String.match(/^data:image\/(png|jpeg);base64,(.+)$/);
+                    //         if (match) {
+                    //             const ext = match[1];  // Image format
+                    //             const data = match[2]; // Base64 data
+                    //             const buffer = Buffer.from(data, 'base64');
+
+                    //             // Create the file path
+                    //             const filePath = path.join(__dirname, `image_${index}.${ext}`);
+
+                    //             // Save the image to the filesystem
+                    //             fs.writeFileSync(filePath, buffer);
+
+                    //             if (index != 0) {
+                    //                     const url = await upload(`image_${index}.${ext}`);
+                    //                     chapterData.images.push(url);
+                    //             }
+                    //         }
+                    //     }
+                    // });
+
+                    const uploadedUrls = await Promise.all(
+                        dataObj['images'].map(async (base64String, index) => {
+                            if (base64String) {
+                                // Extract the image format (jpeg/png) from the base64 string
+                                const match = base64String.match(/^data:image\/(png|jpeg);base64,(.+)$/);
+                                if (match) {
+                                    const ext = match[1];  // Image format
+                                    const data = match[2]; // Base64 data
+                                    const buffer = Buffer.from(data, 'base64');
+
+                                    // Create the file path
+                                    const filePath = path.join(__dirname, `image_${index}.${ext}`);
+
+                                    // Save the image to the filesystem
+                                    fs.writeFileSync(filePath, buffer);
+
+                                    if (index != 0) {
+                                        // Use a promise to wait for the upload to complete
+                                        await new Promise((resolve) => setTimeout(resolve, 1000));
+                                        const url = await upload(`image_${index}.${ext}`);
+                                        return url;
+                                    }
+                                }
+                            }
+                            return null; // In case there's no base64String, return null
+                        })
+                    );
+                    chapterData.images = uploadedUrls.filter(url => url); // Filter out null results
                     const chapterCreate = await createChapter(chapterData);
-                    console.log('chapterCreate:', chapterCreate);
                     // await newPage.close();
                 }
 
@@ -224,9 +284,10 @@ const scraperObject = {
 
         let scrapedData = [];
         // Loop through all the URLs and fetch data from each
-        for (let i = 0; i < 1; i++) {
+        console.log(urls);
+        for (let url of urls) {
             try {
-                let currentPageData = await pagePromise(urls[i]);
+                let currentPageData = await pagePromise(url);
                 if (currentPageData) {
                     scrapedData.push(currentPageData);
                 }

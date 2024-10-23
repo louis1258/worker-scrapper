@@ -84,5 +84,25 @@ const createChapter = (chapter) => {
         throw error;  // Ném lỗi ra ngoài để xử lý ở nơi gọi hàm
     });
 }
+
+
+
+const COMICTYPE_URL = 'http://localhost:9000/api/comic-types/findName';
+const createComicType = (type) => {
+    const config = {
+        headers: {
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY`
+        },
+        timeout: 60000
+    }
+    return axios.post(COMICTYPE_URL, type, config)
+    .then(response => {
+        return response.data;  // Trả về data từ response
+    })
+    .catch(error => {
+        console.error('Error create comic type :', error);
+        throw error;  // Ném lỗi ra ngoài để xử lý ở nơi gọi hàm
+    });
+}
 // Export the function using CommonJS
-module.exports = { upload, createComic,createChapter };
+module.exports = { upload, createComic,createChapter, createComicType};
