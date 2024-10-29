@@ -1,74 +1,53 @@
 const waitForElement = require("./utils/checkElement");
 const fs = require('fs');
+const puppeteer = require('puppeteer');
 const path = require('path');
 const https = require('https');
 const axios = require('axios');
 const { upload, createComic, createChapter, createComicType } = require("./api");
 const createSlug = require("./utils/slug");
+const amqp = require('amqplib');
+const randomDelay = async (min = 500, max = 1500) => {
+    const delay = Math.floor(Math.random() * (max - min + 1)) + min;
+    return new Promise((resolve) => setTimeout(resolve, delay));
+};
+const userAgent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0 Mobile Safari/537.36";
+const proxyUrl = 'hndc8.proxyxoay.net:44499';  // Replace with your actual proxy URL and port
+const proxyUsername = 'louis1258';
+const proxyPassword = 'Htn@1258';
+const apiKey = '1d9607b7-4840-4ce2-b1b1-fbb273e9913f';
+
 const scraperObject = {
     url: 'https://truyenqqto.com',
     async scraper(browser) {
-        let page = await browser.newPage();
-        console.log(`Navigating to ${this.url}...`);
-        let urls = [];
-        const urlRedirect = 'https://truyenqqto.com/truyen-moi-cap-nhat/trang-2.html'
-        const navigationPromise = page.waitForNavigation({ waitUntil: "domcontentloaded" });
 
-        try {
-            await page.goto(this.url, { waitUntil: 'networkidle2' });
-
-            // Wait for the list to load
-            await navigationPromise;
-            await page.waitForSelector('#list_new');
-
-            // Scrape all hrefs inside the a tags within the li elements
-            const url = await page.$$eval('#list_new li .book_avatar a', links => {
-                return links.map(link => link.href);  // Extract href attribute
-            });
-            urls = urls.concat(url)
-            await page.goto(urlRedirect, { waitUntil: 'networkidle2' });
-            const maxPageNumber = await page.$$eval('#main_homepage > div.page_redirect > a', links => {
-                const pageNumbers = links.map(link => {
-                    const href = link.href;
-                    const match = href.match(/trang-(\d+)\.html/);  // Extract the page number from the href
-                    return match ? parseInt(match[1]) : null;
-                }).filter(num => num !== null);  // Filter out null values
-                return Math.max(...pageNumbers);  // Return the highest page number
-            });
-            
-            console.log(`Max page number detected: ${maxPageNumber}`);
-            let i =2 
-            while(i<316){
-                const url = `https://truyenqqto.com/truyen-moi-cap-nhat/trang-${i}.html`
-                await page.goto(url, { waitUntil: 'networkidle2' });
-                 await page.waitForSelector('#main_homepage > div.list_grid_out > ul > li > div.book_avatar > a')
-                const totalpage = await page.$$eval('#main_homepage > div.list_grid_out > ul > li > div.book_avatar > a', links => {
-                    return links.map(link => link.href);  // Extract href attribute
-                });
-                urls = urls.concat(totalpage);
-                i ++ ;
-            }
-            await page.waitForSelector('#main_homepage > div.list_grid_out > ul');
-            const newUrls = await page.$$eval('#main_homepage > div.list_grid_out > ul > li > div.book_avatar > a ', links => {
-                return links.map(link => link.href);  // Extract href attribute
-            });
-            urls = urls.concat(newUrls);
-
-        } catch (error) {
-            console.error(`Error during scraping:`, error);
-        } finally {
-            await page.close(); // Close the main page after scraping
-        }
-
-
+    
+    
 
         // Loop through each of those links, open a new page instance, and get the relevant data
         let pagePromise = async (link) => {
             console.log(link, 'link');
 
             let dataObj = {};
+            // const browser = await puppeteer.launch({
+            //     headless: false,
+            //     args: [`--proxy-server=${proxyUrl}`] // Set proxy server
+            // });
+        
+        
             const newPage = await browser.newPage();
+            // Set API key in request headers
+            // await newPage.setExtraHTTPHeaders({
+            //     'Authorization': `Bearer ${apiKey}`
+            // });
+            // await newPage.setUserAgent(userAgent);
+            // // Authenticate with proxy using username and password
+            // await newPage.authenticate({
+            //     username: proxyUsername,
+            //     password: proxyPassword
+            // });
             try {
+                await randomDelay(300, 1000);
                 await newPage.goto(link, { waitUntil: 'networkidle2' });
                 // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
 
@@ -80,6 +59,7 @@ const scraperObject = {
 
                 // Scrape the title or any other details from the individual book page
                 //newPage.$eval('.book_detail > .book_info > .book_avatar > img', img => img.src);
+                await randomDelay(300, 1000);
                 dataObj['coverImage'] = await newPage.evaluate(async () => {
                     const img = document.querySelector('.book_detail > .book_info > .book_avatar > img');
                     const src = img ? img.src : null;
@@ -108,7 +88,8 @@ const scraperObject = {
                         return null;
                     }
                 });
-
+        
+               
                 // Now that you have the base64 string in `dataObj['coverImage']`, save it and upload
                 if (dataObj['coverImage']) {
                     // Extract the image format (jpeg/png) from the base64 string
@@ -142,7 +123,7 @@ const scraperObject = {
                     dataObj['genres'].map(async (type) => {
                         dataComicType.name = type;
                         const typeComic = await createComicType(dataComicType);
-                        return typeComic[0]._id; // Trả về _id của ComicType
+                        return typeComic._id; // Trả về _id của ComicType
                     })
                 );
                 
@@ -297,21 +278,41 @@ const scraperObject = {
         };
 
         let scrapedData = [];
+        const queue = 'crawlQueue';
+
         // Loop through all the URLs and fetch data from each
-        console.log(urls);
-        for (let url of urls) {
-            try {
-                let currentPageData = await pagePromise(url);
-                if (currentPageData) {
+        const connection = await amqp.connect("amqp://your_username:your_password@77.237.236.3:5672");
+        const channel = await connection.createChannel();
+        await channel.prefetch(1);
+        // Ensure the queue exists
+        await channel.assertQueue(queue, { durable: true });
+
+        console.log(`✅ Waiting for tasks in queue: ${queue}`);
+        // Consume messages from the queue
+        channel.consume(queue, async (message) => {
+            if (message !== null) {
+                const task = JSON.parse(message.content.toString()); // Convert string to JSON
+                console.log(`📥 Received task: ${task.href}`); // Access the correct href property
+
+                try {
+                    // Process the task here
+                    const currentPageData = await pagePromise(task.href);
                     scrapedData.push(currentPageData);
+                    console.log(`✅ Task completed: ${task.href}`);
+                    channel.ack(message); // Acknowledge the message after successful processing
+                } catch (error) {
+                    console.error(`❌ Error processing task: ${task.href}`, error);
+                    // Optionally, you can reject the message or handle it as needed
+                    channel.nack(message); // If you want to requeue the message
                 }
-            } catch (error) {
-                console.error(`Error scraping link: ${link}`, error);
             }
-        }
+        }, {
+            noAck: false // Ensure messages are acknowledged after processing
+        });
+
 
         // After all scraping is done, close the browser
-        await browser.close();
+        // await browser.close();
     }
 };
 

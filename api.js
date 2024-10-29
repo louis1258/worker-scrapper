@@ -4,7 +4,7 @@ const path = require('path');
 const FormData = require('form-data');
 
 // API endpoint for uploading the file
-const baseURL = 'http://localhost:9000/api/upload';
+const baseURL = 'http://77.237.236.3:9000/api/upload';
 
 const upload = (image) => {
     const filePath = path.join(__dirname, image);  // Path to the image file
@@ -18,7 +18,7 @@ const upload = (image) => {
     const config = {
         headers: {
             'Content-Type': `multipart/form-data`,  // Axios handles the boundary automatically
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTcyOTU3OTI3NSwiZXhwIjoxNzI5NjY1Njc1fQ.TYPhn83dcg_NRVcERVNfQJ7P2J7d2lvgDNxWLRQ3lD4`,  // Add your token here if needed
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDIxMzc4OSwiZXhwIjoxNzMwMzAwMTg5fQ.nxEysIpsXVLxzKHmz5KfTrjDuvve2C32q8RGnwZ1xqw`,  // Add your token here if needed
             ...formData.getHeaders(),  // Automatically set the multipart headers
         },
         timeout: 60000
@@ -46,11 +46,11 @@ const upload = (image) => {
         });
 };
 
-const COMIC_URL = 'http://localhost:9000/api/comics';
+const COMIC_URL = 'http://77.237.236.3:9000/api/comics';
 const createComic = (comic) => {
     const config = {
         headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTcyOTU3OTI3NSwiZXhwIjoxNzI5NjY1Njc1fQ.TYPhn83dcg_NRVcERVNfQJ7P2J7d2lvgDNxWLRQ3lD4`,  // Add your token here if needed
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDIxMzc4OSwiZXhwIjoxNzMwMzAwMTg5fQ.nxEysIpsXVLxzKHmz5KfTrjDuvve2C32q8RGnwZ1xqw`,  // Add your token here if needed
         },
         timeout: 60000
     };
@@ -67,11 +67,11 @@ const createComic = (comic) => {
 }
 
 
-const CHAPTER_URL = 'http://localhost:9000/api/chapters';
+const CHAPTER_URL = 'http://77.237.236.3:9000/api/chapters';
 const createChapter = (chapter) => {
     const config = {
         headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY`
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDIxMzc4OSwiZXhwIjoxNzMwMzAwMTg5fQ.nxEysIpsXVLxzKHmz5KfTrjDuvve2C32q8RGnwZ1xqw`
         },
         timeout: 60000
     }
@@ -87,11 +87,11 @@ const createChapter = (chapter) => {
 
 
 
-const COMICTYPE_URL = 'http://localhost:9000/api/comic-types/findName';
+const COMICTYPE_URL = 'http://77.237.236.3:9000/api/comic-types/findName';
 const createComicType = (type) => {
     const config = {
         headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY`
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDIxMzc4OSwiZXhwIjoxNzMwMzAwMTg5fQ.nxEysIpsXVLxzKHmz5KfTrjDuvve2C32q8RGnwZ1xqw`
         },
         timeout: 60000
     }
