@@ -11,7 +11,7 @@ const randomDelay = async (min = 500, max = 1500) => {
     const delay = Math.floor(Math.random() * (max - min + 1)) + min;
     return new Promise((resolve) => setTimeout(resolve, delay));
 };
-const userAgent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0 Mobile Safari/537.36";
+const userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
 const proxyUrl = 'hndc8.proxyxoay.net:44499';  // Replace with your actual proxy URL and port
 const proxyUsername = 'louis1258';
 const proxyPassword = 'Htn@1258';
@@ -40,7 +40,7 @@ const scraperObject = {
             // await newPage.setExtraHTTPHeaders({
             //     'Authorization': `Bearer ${apiKey}`
             // });
-            // await newPage.setUserAgent(userAgent);
+            await newPage.setUserAgent(userAgent);
             // // Authenticate with proxy using username and password
             // await newPage.authenticate({
             //     username: proxyUsername,
