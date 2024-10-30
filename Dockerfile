@@ -31,4 +31,5 @@ COPY . .
 EXPOSE 3000
 
 # Lệnh khởi chạy ứng dụng
-CMD ["node", "index.js"]  # Thay "index.js" bằng file chính của bạn
+ENTRYPOINT ["npm", "start"]
+ # Thay "index.js" bằng file chính của bạn
