@@ -18,7 +18,7 @@ const upload = (image) => {
     const config = {
         headers: {
             'Content-Type': `multipart/form-data`,  // Axios handles the boundary automatically
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDIxMzc4OSwiZXhwIjoxNzMwMzAwMTg5fQ.nxEysIpsXVLxzKHmz5KfTrjDuvve2C32q8RGnwZ1xqw`,  // Add your token here if needed
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDMwNzM2NSwiZXhwIjoxNzMwMzkzNzY1fQ.RBmGtu579G6wHgMFr4LDF1ry3lK-mJ0XnPOBIG4nTzc`,  // Add your token here if needed
             ...formData.getHeaders(),  // Automatically set the multipart headers
         },
         timeout: 60000
@@ -50,7 +50,7 @@ const COMIC_URL = 'http://77.237.236.3:9000/api/comics';
 const createComic = (comic) => {
     const config = {
         headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDIxMzc4OSwiZXhwIjoxNzMwMzAwMTg5fQ.nxEysIpsXVLxzKHmz5KfTrjDuvve2C32q8RGnwZ1xqw`,  // Add your token here if needed
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDMwNzM2NSwiZXhwIjoxNzMwMzkzNzY1fQ.RBmGtu579G6wHgMFr4LDF1ry3lK-mJ0XnPOBIG4nTzc`,  // Add your token here if needed
         },
         timeout: 60000
     };
@@ -71,7 +71,7 @@ const CHAPTER_URL = 'http://77.237.236.3:9000/api/chapters';
 const createChapter = (chapter) => {
     const config = {
         headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDIxMzc4OSwiZXhwIjoxNzMwMzAwMTg5fQ.nxEysIpsXVLxzKHmz5KfTrjDuvve2C32q8RGnwZ1xqw`
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDMwNzM2NSwiZXhwIjoxNzMwMzkzNzY1fQ.RBmGtu579G6wHgMFr4LDF1ry3lK-mJ0XnPOBIG4nTzc`
         },
         timeout: 60000
     }
@@ -91,7 +91,7 @@ const COMICTYPE_URL = 'http://77.237.236.3:9000/api/comic-types/findName';
 const createComicType = (type) => {
     const config = {
         headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDIxMzc4OSwiZXhwIjoxNzMwMzAwMTg5fQ.nxEysIpsXVLxzKHmz5KfTrjDuvve2C32q8RGnwZ1xqw`
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDMwNzM2NSwiZXhwIjoxNzMwMzkzNzY1fQ.RBmGtu579G6wHgMFr4LDF1ry3lK-mJ0XnPOBIG4nTzc`
         },
         timeout: 60000
     }
