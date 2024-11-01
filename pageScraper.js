@@ -53,8 +53,9 @@ const scraperObject = {
                 password: proxyPassword
             });
             try {
-                await newPage.goto(chapter.link, { waitUntil: 'domcontentloaded', timeout: 20000 });
-                // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
+                await newPage.goto(link, { waitUntil: 'domcontentloaded', timeout: 20000 });
+                console.log(await newPage.content())
+		    // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
 
                 // if (ads) {
                 //     console.warn('Popup ad detected! Closing it...');
