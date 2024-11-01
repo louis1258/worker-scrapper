@@ -53,8 +53,9 @@ const scraperObject = {
                 password: proxyPassword
             });
             try {
-                await newPage.goto(link, { waitUntil: 'networkidle2' });
-                // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
+                await newPage.goto(link, { waitUntil: 'domcontentloaded', timeout: 20000 });
+                console.log(await newPage.content())
+		    // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
 
                 // if (ads) {
                 //     console.warn('Popup ad detected! Closing it...');
@@ -177,8 +178,7 @@ const scraperObject = {
                 const resultComic = await createComic(dataObj);
                 console.log('Comic created:', resultComic);
 
-                const checkChapter = await waitForElement(newPage, 'body > div.content > div.div_middle > div.main_content > div.book_detail > div.list_chapter > div');
-
+             
                 dataObj['chapter'] = await newPage.$$eval(
                     'body > div.content > div.div_middle > div.main_content > div.book_detail > div.list_chapter > div > .works-chapter-item',
                     chapters => {
@@ -191,13 +191,13 @@ const scraperObject = {
                         });
                     }
                 );
-                
 
                 // Fetch chapter content
                 for (const [index, chapter] of dataObj['chapter'].reverse().entries()) {
                     console.log(chapter);
                     try {
-                        await newPage.goto(chapter.link, { waitUntil: 'networkidle2', timeout: 20000 });
+            await newPage.goto(chapter.link, { waitUntil: 'domcontentloaded', timeout: 20000 });
+
                     } catch (error) {
                         console.error(`Failed to load ${chapter.link}:`, error);
                         continue; // Skip to the next chapter
@@ -325,3 +325,4 @@ const scraperObject = {
 };
 
 module.exports = scraperObject;
+
