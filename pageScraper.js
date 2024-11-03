@@ -174,6 +174,11 @@ const scraperObject = {
                             if(checkElement){
                                 return checkElement.textContent.trim() ?? null;
                             }
+                            else
+                            {
+                                const checkContinue = document.querySelector(' body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content')
+                                    return  checkContinue ? checkContinue.textContent.trim(): null;
+                            }
                     }
                 });
                 console.log(dataObj['description']);
