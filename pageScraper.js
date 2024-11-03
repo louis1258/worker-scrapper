@@ -32,13 +32,12 @@ const scraperObject = {
 
 
 
+        let dataObj = {};
+         browser = await puppeteer.launch({ executablePath: '/usr/bin/chromium-browser', args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
 
+        
         // Loop through each of those links, open a new page instance, and get the relevant data
         let pagePromise = async (link) => {
-
-            let dataObj = {};
-            const browser = await puppeteer.launch({ executablePath: '/usr/bin/chromium-browser', args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
-
             const newPage = await browser.newPage();
             // Set API key in request headers
             await newPage.setExtraHTTPHeaders({
@@ -52,9 +51,9 @@ const scraperObject = {
                 username: proxyUsername,
                 password: proxyPassword
             });
+
             try {
                 await newPage.goto(link, { waitUntil: 'domcontentloaded', timeout: 20000 });
-                console.log(await newPage.content())
 		    // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
 
                 // if (ads) {
@@ -285,7 +284,7 @@ const scraperObject = {
                 await newPage.close();
             }
             finally{
-                await browser.close();
+                await newPage.close();
             }
         };
 
