@@ -17,10 +17,10 @@ user_agent_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
 ]
 const userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
-const proxyUrl = 'hndc21.proxyxoay.net:32051';  // Replace with your actual proxy URL and port
+const proxyUrl = 'hndc31.proxyxoay.net:15925';  // Replace with your actual proxy URL and port
 const proxyUsername = 'louis1258';
 const proxyPassword = 'Htn@1258';
-const apiKey = 'e2d48a85-ba4a-4bf1-9170-7a2f02cde6ab';
+const apiKey = '6c1be37c-bbcf-425f-ad20-3c3d4ef2f7bd';
 const userAgentList = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
@@ -143,7 +143,7 @@ const scraperObject = {
                 // }
                 dataObj['title'] = await newPage.$eval('.book_detail > .book_info > .book_other > h1', title => title.textContent);
                 dataObj['genres'] = await newPage.$$eval('.book_detail > .book_info > .book_other > .list01 .li03 > a', genres => {
-                    return genres.map(genre => genre.textContent.trim());  // Extract and trim the text content of each genre
+                    return genres.map(genre => genre.textContent.trim() ?? null) ;  // Extract and trim the text content of each genre
                 });
 
                 const dataComicType = {
@@ -167,10 +167,15 @@ const scraperObject = {
                         return checkInner.textContent.trim();
                     else {
                         const checkOuter = document.querySelector('body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content > p')
-                        return checkOuter.textContent.trim();
+                        if(checkOuter){
+                            return checkOuter.textContent.trim();
+                        }
+                        const checkElement = document.querySelector('body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content')
+                            if(checkElement){
+                                return checkElement.textContent.trim() ?? null;
+                            }
                     }
                 });
-
                 console.log(dataObj['description']);
                 // Scrape chapters
                 dataObj.slug = createSlug(dataObj.title)
