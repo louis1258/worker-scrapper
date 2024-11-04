@@ -226,7 +226,7 @@ const scraperObject = {
                     console.log(chapter);
                     try {
                         await randomDelay(100, 500);
-            await newPage.goto(chapter.link, { waitUntil: 'domcontentloaded', timeout: 20000 });
+            await newPage.goto(chapter.link, { waitUntil: 'domcontentloaded', timeout: 200000 });
 
                     } catch (error) {
                         console.error(`Failed to load ${chapter.link}:`, error);
