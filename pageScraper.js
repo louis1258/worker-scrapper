@@ -26,6 +26,37 @@ const userAgentList = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
 ];
+async function fetchWithRetry(src, retries = 3, delay = 2000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            const response = await fetch(src, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+                    'Referer': 'https://truyenqqto.com/',
+                },
+                timeout: 10000 // Optional timeout for fetch in milliseconds
+            });
+
+            console.log(`Attempt ${attempt}: Fetch Response Status:`, response.status);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            return await response.arrayBuffer(); // Use response.text() or response.json() if needed
+        } catch (error) {
+            console.error(`Attempt ${attempt} failed for ${src}:`, error);
+
+            if (attempt < retries) {
+                console.log(`Retrying in ${delay} ms...`);
+                await new Promise(res => setTimeout(res, delay));
+            } else {
+                console.error(`Failed to fetch after ${retries} attempts`);
+                throw error; // Re-throw the error after the final failed attempt
+            }
+        }
+    }
+}
 const scraperObject = {
     url: 'https://truyenqqto.com',
     async scraper(browser) {
@@ -78,20 +109,9 @@ const scraperObject = {
                 }
 
                 try {
-                    const response = await fetch(coverImageSrc, {
-                        headers: {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-                            'Referer': 'https://truyenqqto.com/',
-                        }
-                    });
 
-                    console.log('Fetch Response Status:', response.status); // Check fetch status
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const arrayBuffer = await response.arrayBuffer(); // Get the image as ArrayBuffer
+                    const arrayBuffer = await fetchWithRetry(coverImageSrc); // Get the image as ArrayBuffer
                     const buffer = Buffer.from(arrayBuffer); // Convert ArrayBuffer to Buffer
                     const base64String = buffer.toString('base64'); // Convert buffer to base64
                     const ext = coverImageSrc.split('.').pop().split('?')[0]; // Extract the extension from the URL
@@ -223,21 +243,9 @@ const scraperObject = {
                         imagesSrc.map(async (src, imageIndex) => {
                             if (src) {
                                 try {
-                                    // Fetch the image with proper headers
-                                    const response = await fetch(src, {
-                                        headers: {
-                                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-                                            'Referer': 'https://truyenqqto.com/',
-                                        }
-                                    });
 
-                                    console.log('Fetch Response Status:', response.status); // Log fetch status
 
-                                    if (!response.ok) {
-                                        throw new Error(`HTTP error! status: ${response.status}`);
-                                    }
-
-                                    const arrayBuffer = await response.arrayBuffer(); // Get the image as ArrayBuffer
+                                    const arrayBuffer =  await fetchWithRetry(src); // Get the image as ArrayBuffer
                                     const buffer = Buffer.from(arrayBuffer); // Convert ArrayBuffer to Buffer
                                     const base64String = buffer.toString('base64'); // Convert buffer to base64
                                     const ext = src.split('.').pop().split('?')[0]; // Extract the extension from the URL
