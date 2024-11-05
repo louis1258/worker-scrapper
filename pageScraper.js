@@ -26,7 +26,7 @@ const userAgentList = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
 ];
-async function fetchWithRetry(src, retries = 3, delay = 2000) {
+async function fetchWithRetry(src, retries = 3, delay = 20000) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             const response = await fetch(src, {
@@ -53,6 +53,25 @@ async function fetchWithRetry(src, retries = 3, delay = 2000) {
             } else {
                 console.error(`Failed to fetch after ${retries} attempts`);
                 throw error; // Re-throw the error after the final failed attempt
+            }
+        }
+    }
+}
+async function gotoWithRetry(page, url, maxRetries = 3) {
+    let retries = 0;
+    while (retries < maxRetries) {
+        try {
+            await randomDelay(100, 500);
+            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 200000 });
+            return true; // Thành công, thoát vòng lặp
+        } catch (error) {
+            console.error(`Failed to load ${url} (Attempt ${retries + 1} of ${maxRetries}):`, error);
+            retries += 1;
+            if (retries < maxRetries) {
+                console.log(`Retrying ${url}...`);
+            } else {
+                console.error(`All retry attempts failed for ${url}`);
+                return false; // Tất cả retry đều thất bại
             }
         }
     }
@@ -86,17 +105,8 @@ const scraperObject = {
             });
 
             try {
-                await newPage.goto(link, { waitUntil: 'domcontentloaded', timeout: 20000 });
-                // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
-
-                // if (ads) {
-                //     console.warn('Popup ad detected! Closing it...');
-                //     await newPage.click('#close-popup-truyenqq');
-                //     console.log('Popup closed');
-                // }
-
-                // Scrape the title or any other details from the individual book page
-                //newPage.$eval('.book_detail > .book_info > .book_avatar > img', img => img.src);
+                // await newPage.goto(link, { waitUntil: 'domcontentloaded', timeout: 20000 });
+                await gotoWithRetry(newPage, link, 3);
                 await randomDelay(100, 500);
                 dataObj['title'] = await newPage.$eval('.book_detail > .book_info > .book_other > h1', title => title.textContent);
                 const coverImageSrc = await newPage.$eval(
@@ -144,26 +154,6 @@ const scraperObject = {
                 } catch (error) {
                     console.error(`Error fetching or processing the image from ${coverImageSrc}:`, error);
                 }
-
-                // Now that you have the base64 string in `dataObj['coverImage']`, save it and upload
-                // if (dataObj['coverImage']) {
-                //     // Extract the image format (jpeg/png) from the base64 string
-                //     const match = dataObj['coverImage'].match(/^data:image\/(png|jpeg);base64,(.+)$/);
-                //     if (match) {
-                //         const ext = match[1];  // Image format
-                //         const data = match[2]; // Base64 data
-                //         const buffer = Buffer.from(data, 'base64');
-                //         // Create the file path
-                //         const filePath = path.join(__dirname, `cover_image.${ext}`);
-                //         // Save the image to the filesystem
-                //         fs.writeFileSync(filePath, buffer);
-                //         // Upload the image after saving
-                //         const url = await upload(`cover_image.${ext}`);
-                //         dataObj['coverImage'] = url
-                //     }
-                // } else {
-                //     console.error('No cover image to save or upload.');
-                // }
                 dataObj['genres'] = await newPage.$$eval('.book_detail > .book_info > .book_other > .list01 .li03 > a', genres => {
                     return genres.map(genre => genre.textContent.trim() ?? null);  // Extract and trim the text content of each genre
                 });
@@ -227,7 +217,8 @@ const scraperObject = {
                     console.log(chapter);
                     try {
                         await randomDelay(100, 500);
-                        await newPage.goto(chapter.link, { waitUntil: 'domcontentloaded', timeout: 200000 });
+                        // await newPage.goto(chapter.link, { waitUntil: 'domcontentloaded', timeout: 200000 });
+                        await gotoWithRetry(newPage, chapter.link, 3);
 
                     } catch (error) {
                         console.error(`Failed to load ${chapter.link}:`, error);
@@ -340,9 +331,6 @@ const scraperObject = {
             noAck: false // Ensure messages are acknowledged after processing
         });
 
-
-        // After all scraping is done, close the browser
-        // await browser.close();
     }
 };
 
