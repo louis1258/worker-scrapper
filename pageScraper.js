@@ -64,15 +64,17 @@ const scraperObject = {
 
 
         let dataObj = {};
-         browser = await puppeteer.launch({ executablePath: '/usr/bin/chromium-browser', args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
+        browser = await puppeteer.launch({ executablePath: '/usr/bin/chromium-browser', args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
 
-        
+
         // Loop through each of those links, open a new page instance, and get the relevant data
         let pagePromise = async (link) => {
             const newPage = await browser.newPage();
             // Set API key in request headers
             await newPage.setExtraHTTPHeaders({
-                'Authorization': `Bearer ${apiKey}`
+                'Authorization': `Bearer ${apiKey}`,
+                'Referer': 'https://truyenqqto.com/',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
             });
             const randomIndex = Math.floor(Math.random() * userAgentList.length);
             userAgentList[randomIndex];
@@ -85,7 +87,7 @@ const scraperObject = {
 
             try {
                 await newPage.goto(link, { waitUntil: 'domcontentloaded', timeout: 20000 });
-		    // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
+                // const ads = await newPage.$('#popup-truyenqq > div > div > .popup-icon-close > #close-popup-truyenqq');
 
                 // if (ads) {
                 //     console.warn('Popup ad detected! Closing it...');
@@ -96,6 +98,7 @@ const scraperObject = {
                 // Scrape the title or any other details from the individual book page
                 //newPage.$eval('.book_detail > .book_info > .book_avatar > img', img => img.src);
                 await randomDelay(100, 500);
+                dataObj['title'] = await newPage.$eval('.book_detail > .book_info > .book_other > h1', title => title.textContent);
                 const coverImageSrc = await newPage.$eval(
                     '.book_detail > .book_info > .book_avatar > img',
                     img => img ? img.src : null
@@ -128,12 +131,12 @@ const scraperObject = {
                         const finalBuffer = Buffer.from(data, 'base64'); // Convert base64 data to buffer
 
                         // Create the file path
-                        const filePath = path.join(__dirname, `cover_image.${imgExt}`);
+                        const filePath = path.join(__dirname, `${dataObj['title']}.${imgExt}`);
                         // Save the image to the filesystem
                         fs.writeFileSync(filePath, finalBuffer);
 
                         // Upload the image after saving
-                        const url = await upload(`cover_image.${imgExt}`); // Ensure you use the correct file path for upload
+                        const url = await upload(`${dataObj['title']}.${imgExt}`); // Ensure you use the correct file path for upload
                         dataObj['coverImage'] = url;
                     } else {
                         console.error('Base64 string format is incorrect after construction.');
@@ -161,9 +164,8 @@ const scraperObject = {
                 // } else {
                 //     console.error('No cover image to save or upload.');
                 // }
-                dataObj['title'] = await newPage.$eval('.book_detail > .book_info > .book_other > h1', title => title.textContent);
                 dataObj['genres'] = await newPage.$$eval('.book_detail > .book_info > .book_other > .list01 .li03 > a', genres => {
-                    return genres.map(genre => genre.textContent.trim() ?? null) ;  // Extract and trim the text content of each genre
+                    return genres.map(genre => genre.textContent.trim() ?? null);  // Extract and trim the text content of each genre
                 });
 
                 const dataComicType = {
@@ -187,18 +189,17 @@ const scraperObject = {
                         return checkInner.textContent.trim();
                     else {
                         const checkOuter = document.querySelector('body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content > p')
-                        if(checkOuter){
+                        if (checkOuter) {
                             return checkOuter.textContent.trim();
                         }
                         const checkElement = document.querySelector('body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content')
-                            if(checkElement){
-                                return checkElement.textContent.trim() ?? null;
-                            }
-                            else
-                            {
-                                const checkContinue = document.querySelector(' body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content')
-                                    return  checkContinue ? checkContinue.textContent.trim(): null;
-                            }
+                        if (checkElement) {
+                            return checkElement.textContent.trim() ?? null;
+                        }
+                        else {
+                            const checkContinue = document.querySelector(' body > div.content > div.div_middle > div.main_content > div.book_detail > div.story-detail-info.detail-content')
+                            return checkContinue ? checkContinue.textContent.trim() : null;
+                        }
                     }
                 });
                 console.log(dataObj['description']);
@@ -207,7 +208,7 @@ const scraperObject = {
                 const resultComic = await createComic(dataObj);
                 console.log('Comic created:', resultComic);
 
-             
+
                 dataObj['chapter'] = await newPage.$$eval(
                     'body > div.content > div.div_middle > div.main_content > div.book_detail > div.list_chapter > div > .works-chapter-item',
                     chapters => {
@@ -226,7 +227,7 @@ const scraperObject = {
                     console.log(chapter);
                     try {
                         await randomDelay(100, 500);
-            await newPage.goto(chapter.link, { waitUntil: 'domcontentloaded', timeout: 200000 });
+                        await newPage.goto(chapter.link, { waitUntil: 'domcontentloaded', timeout: 200000 });
 
                     } catch (error) {
                         console.error(`Failed to load ${chapter.link}:`, error);
@@ -245,7 +246,7 @@ const scraperObject = {
                                 try {
 
 
-                                    const arrayBuffer =  await fetchWithRetry(src); // Get the image as ArrayBuffer
+                                    const arrayBuffer = await fetchWithRetry(src); // Get the image as ArrayBuffer
                                     const buffer = Buffer.from(arrayBuffer); // Convert ArrayBuffer to Buffer
                                     const base64String = buffer.toString('base64'); // Convert buffer to base64
                                     const ext = src.split('.').pop().split('?')[0]; // Extract the extension from the URL
@@ -262,13 +263,13 @@ const scraperObject = {
                                         const finalBuffer = Buffer.from(data, 'base64'); // Convert base64 data to buffer
 
                                         // Create the file path for each chapter image
-                                        const filePath = path.join(__dirname, `chapter_image_${index}_${imageIndex}.${imgExt}`);
+                                        const filePath = path.join(__dirname, `chapter_image_${index}_${resultComic._id}${imageIndex}.${imgExt}`);
                                         // Save the image to the filesystem
                                         fs.writeFileSync(filePath, finalBuffer);
                                         console.log('Image saved at:', filePath); // Log file save confirmation
 
                                         // Upload the image after saving
-                                        const url = await upload(`chapter_image_${index}_${imageIndex}.${imgExt}`); // Upload the image
+                                        const url = await upload(`chapter_image_${index}_${resultComic._id}${imageIndex}.${imgExt}`); // Upload the image
                                         return url; // Return the uploaded image URL
                                     } else {
                                         console.error('Base64 string format is incorrect after construction.');
@@ -301,7 +302,7 @@ const scraperObject = {
                 console.error(`Error scraping link: ${link}`, err);
                 await newPage.close();
             }
-            finally{
+            finally {
                 await newPage.close();
             }
         };
