@@ -275,18 +275,20 @@ const scraperObject = {
                     );
 
                     // Save the uploaded image URLs to the chapter data
-                    const numberMatch = chapter.title.match(/\d+(\.\d+)?$/);
-                    let chapterNumber = 0
-                    if (numberMatch) {
-                         chapterNumber = parseFloat(numberMatch[0]); 
-                    } else {
-                        chapterNumber = chapter.title
+                    const parts = chapter.title.split(" ");
+                    let chapterNumber = null;
+
+                    for (const part of parts) {
+                        const number = parseFloat(part);
+                        if (!isNaN(number)) {
+                            chapterNumber = number;
+                            break; 
+                        }
                     }
-                    console.log(chapterNumber,'chapterNumber');
                     const chapterData = {
                         comic: `${resultComic._id}`,
-                        order: index+1,
-                        title: `Chapter ${numberMatch}`,
+                        order: index + 1,
+                        title: `Chapter ${chapterNumber}`,
                         images: uploadedImageUrls.filter(url => url) // Filter out any null results
                     };
 
