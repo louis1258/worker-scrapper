@@ -277,8 +277,8 @@ const scraperObject = {
                     // Save the uploaded image URLs to the chapter data
                     const chapterData = {
                         comic: `${resultComic._id}`,
-                        order: index,
-                        title: `${chapter.title}`,
+                        order: index+1,
+                        title: `Chapter ${index+1}`,
                         images: uploadedImageUrls.filter(url => url) // Filter out any null results
                     };
 
