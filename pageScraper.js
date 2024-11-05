@@ -17,10 +17,10 @@ user_agent_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
 ]
 const userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
-const proxyUrl = 'hndc21.proxyxoay.net:32051';  // Replace with your actual proxy URL and port
+const proxyUrl = 'hndc15.proxyxoay.net:38397';  // Replace with your actual proxy URL and port
 const proxyUsername = 'louis1258';
 const proxyPassword = 'Htn@1258';
-const apiKey = '6f7badf1-a51f-4f47-9b1b-daaf0f713b70';
+const apiKey = 'e2d48a85-ba4a-4bf1-9170-7a2f02cde6ab';
 const userAgentList = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
