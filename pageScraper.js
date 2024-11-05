@@ -31,7 +31,7 @@ async function fetchWithRetry(src, retries = 3, delay = 20000) {
         try {
             const response = await fetch(src, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
                     'Referer': 'https://truyenqqto.com/',
                 },
                 timeout: 10000 // Optional timeout for fetch in milliseconds
@@ -93,7 +93,7 @@ const scraperObject = {
             await newPage.setExtraHTTPHeaders({
                 'Authorization': `Bearer ${apiKey}`,
                 'Referer': 'https://truyenqqto.com/',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
             });
             const randomIndex = Math.floor(Math.random() * userAgentList.length);
             userAgentList[randomIndex];
