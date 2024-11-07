@@ -7,6 +7,7 @@ const axios = require('axios');
 const { upload, createComic, createChapter, createComicType } = require("./api");
 const createSlug = require("./utils/slug");
 const amqp = require('amqplib');
+const { v4: uuidv4 } = require('uuid');
 const randomDelay = async (min = 500, max = 1500) => {
     const delay = Math.floor(Math.random() * (max - min + 1)) + min;
     return new Promise((resolve) => setTimeout(resolve, delay));
@@ -47,7 +48,7 @@ async function fetchWithRetry(src, retries = 3, delay = 20000) {
                 await new Promise(res => setTimeout(res, delay));
             } else {
                 console.error(`Failed to fetch after ${retries} attempts`);
-                throw error; // Re-throw the error after the final failed attempt
+                throw new Error("retry faild"); // Re-throw the error after the final failed attempt
             }
         }
     }
@@ -66,7 +67,7 @@ async function gotoWithRetry(page, url, maxRetries = 3) {
                 console.log(`Retrying ${url}...`);
             } else {
                 console.error(`All retry attempts failed for ${url}`);
-                return false; // Tất cả retry đều thất bại
+                throw new Error('All retry attempts failed')
             }
         }
     }
@@ -100,69 +101,78 @@ const scraperObject = {
             });
 
             try {
-                    await gotoWithRetry(newPage, payload.chapter, 3);
+                await gotoWithRetry(newPage, payload.chapter, 3);
 
                 // Use $eval to extract image sources for the chapter
+                await waitForElement(newPage, '.page-chapter > img.lazy');
                 const imagesSrc = await newPage.$$eval('.page-chapter > img.lazy', images => {
                     return images.map(img => img.src); // Extract 'src' attributes
                 });
 
                 // Process each image source
-                const uploadedImageUrls = await Promise.all(
-                    imagesSrc.map(async (src, imageIndex) => {
-                        if (src) {
+                let uploadedImageResults
+                try {
+                    uploadedImageResults = await Promise.all(
+                        imagesSrc.map(async (src, imageIndex) => {
                             try {
-                                const arrayBuffer = await fetchWithRetry(src); // Get the image as ArrayBuffer
-                                const buffer = Buffer.from(arrayBuffer); // Convert ArrayBuffer to Buffer
-                                const base64String = buffer.toString('base64'); // Convert buffer to base64
-                                const ext = src.split('.').pop().split('?')[0]; // Extract the extension from the URL
+                                // Kiểm tra nếu src không tồn tại
+                                if (!src) {
+                                    throw new Error(`Image source not found for index: ${imageIndex}`);
+                                }
 
+                                // Fetch image as ArrayBuffer
+                                const arrayBuffer = await fetchWithRetry(src);
+                                const buffer = Buffer.from(arrayBuffer);
+                                const base64String = buffer.toString('base64');
+                                const ext = src.split('.').pop().split('?')[0];
 
-                                // Construct the full base64 string
+                                // Tạo chuỗi base64 đầy đủ
                                 const fullBase64String = `data:image/${ext};base64,${base64String}`;
-
-                                // Check the format of the full base64 string
                                 const match = fullBase64String.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/);
-                                if (match) {
-                                    const imgExt = match[1];  // Image format
-                                    const data = match[2]; // Base64 data
-                                    const finalBuffer = Buffer.from(data, 'base64'); // Convert base64 data to buffer
 
-                                    // Create the file path for each chapter image
-                                    const filePath = path.join(__dirname, `chapter_image_${payload.order}_${payload.comic}${imageIndex}.${imgExt}`);
-                                    // Save the image to the filesystem
-                                    fs.writeFileSync(filePath, finalBuffer);
-                                    console.log('Image saved at:', filePath); // Log file save confirmation
+                                // Kiểm tra định dạng base64
+                                if (!match) {
+                                    throw new Error(`Invalid base64 format for image at index: ${imageIndex}`);
+                                }
 
-                                    // Upload the image after saving
-                                    const url = await upload(`chapter_image_${payload.order}_${payload.comic}${imageIndex}.${imgExt}`); // Upload the image
-                                    return url; // Return the uploaded image URL
-                                } else {
-                                    console.error('Base64 string format is incorrect after construction.');
+                                // Tạo file và lưu vào hệ thống
+                                const imgExt = match[1];
+                                const data = match[2];
+                                const finalBuffer = Buffer.from(data, 'base64');
+                                const uniqueFileName = `chapter_image_${payload.order}_${payload.comic}${imageIndex}_${uuidv4()}.${imgExt}`;
+                                const filePath = path.join(__dirname, uniqueFileName);
+                                fs.writeFileSync(filePath, finalBuffer);
+                                try {
+                                    const url = await upload(uniqueFileName);
+                                    return url
+                                } catch (error) {
+                                    throw new Error("Error uploading")
                                 }
                             } catch (error) {
-                                console.error(`Error fetching or processing the image from ${src}:`, error);
-                                return null; // Return null if there's an error
+                                console.error(`Error processing image at index ${imageIndex}:`, error.message);
+                                throw new Error("Error upload chapter")
                             }
-                        }
-                        return null; // Return null if there's no valid src
-                    })
-                );
+                        })
+                    );
+                } catch (error) {
+                    console.error("Image upload failed, stopping process:", error.message);
+                    throw new Error("failed to upload");
+                }
 
                 const chapterData = {
                     comic: `${payload.comic}`,
                     order: `${payload.order}`,
                     title: `Chapter ${payload.order}`,
-                    images: uploadedImageUrls.filter(url => url) // Filter out any null results
+                    images: uploadedImageResults.filter(url => url) // Filter out any null results
                 };
 
                 // Save chapter data to your database or perform any action with it
                 const chapterCreate = await createChapter(chapterData);
-                console.log(chapterCreate);
                 return chapterCreate;
             } catch (err) {
                 console.error(`Error scraping link: `, err);
                 await newPage.close();
+                throw new Error("Failed to scrape");
             }
             finally {
                 await newPage.close();
@@ -184,8 +194,7 @@ const scraperObject = {
         channel.consume(queue, async (message) => {
             if (message !== null) {
                 const task = JSON.parse(message.content.toString()); // Convert string to JSON
-                console.log(`📥 Received task: ${task.href}`); // Access the correct href property
-
+                console.log(`📥 Received task: ${task.chapter}`); // Access the correct href property
                 try {
                     // Process the task here
                     const currentPageData = await pagePromise(task);
