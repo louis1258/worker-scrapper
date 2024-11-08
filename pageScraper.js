@@ -13,10 +13,10 @@ const randomDelay = async (min = 500, max = 1500) => {
     return new Promise((resolve) => setTimeout(resolve, delay));
 };
 const userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
-const proxyUrl = 'hndc21.proxyxoay.net:32051';  // Replace with your actual proxy URL and port
+const proxyUrl = 'hndc31.proxyxoay.net:15925';  // Replace with your actual proxy URL and port
 const proxyUsername = 'louis1258';
 const proxyPassword = 'Htn@1258';
-const apiKey = '6f7badf1-a51f-4f47-9b1b-daaf0f713b70';
+const apiKey = '6c1be37c-bbcf-425f-ad20-3c3d4ef2f7bd';
 const userAgentList = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
@@ -34,7 +34,9 @@ async function fetchWithRetry(src, retries = 3, delay = 20000) {
             });
 
             console.log(`Attempt ${attempt}: Fetch Response Status:`, response.status);
-
+            if(response.status===504){
+                return false;
+            }
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -79,7 +81,7 @@ const scraperObject = {
 
 
         let dataObj = {};
-        browser = await puppeteer.launch({ executablePath: '/usr/bin/chromium-browser', args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
+        browser = await puppeteer.launch({ args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
 
 
         // Loop through each of those links, open a new page instance, and get the relevant data
@@ -122,6 +124,9 @@ const scraperObject = {
 
                                 // Fetch image as ArrayBuffer
                                 const arrayBuffer = await fetchWithRetry(src);
+                                if(arrayBuffer===false){
+                                    return null
+                                }
                                 const buffer = Buffer.from(arrayBuffer);
                                 const base64String = buffer.toString('base64');
                                 const ext = src.split('.').pop().split('?')[0];
