@@ -81,7 +81,7 @@ const scraperObject = {
 
 
         let dataObj = {};
-        browser = await puppeteer.launch({ executablePath: '/usr/bin/chromium-browser', args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
+        browser = await puppeteer.launch({  args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
 
 
         // Loop through each of those links, open a new page instance, and get the relevant data
@@ -134,10 +134,8 @@ const scraperObject = {
                                 // Tạo chuỗi base64 đầy đủ
                                 const fullBase64String = `data:image/${ext};base64,${base64String}`;
                                 const match = fullBase64String.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/);
-
-                                // Kiểm tra định dạng base64
                                 if (!match) {
-                                    throw new Error(`Invalid base64 format for image at index: ${imageIndex}`);
+                                   return
                                 }
 
                                 // Tạo file và lưu vào hệ thống
