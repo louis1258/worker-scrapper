@@ -50,7 +50,7 @@ async function fetchWithRetry(src, retries = 3, delay = 20000) {
                 await new Promise(res => setTimeout(res, delay));
             } else {
                 console.error(`Failed to fetch after ${retries} attempts`);
-                throw new Error("retry faild"); // Re-throw the error after the final failed attempt
+               return false;
             }
         }
     }
