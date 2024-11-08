@@ -81,7 +81,7 @@ const scraperObject = {
 
 
         let dataObj = {};
-        browser = await puppeteer.launch({  args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
+        browser = await puppeteer.launch({ executablePath: '/usr/bin/chromium-browser',  args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote', `--proxy-server=${proxyUrl}`] })
 
 
         // Loop through each of those links, open a new page instance, and get the relevant data
