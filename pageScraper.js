@@ -33,7 +33,6 @@ async function fetchWithRetry(src, retries = 3, delay = 20000) {
                 timeout: 10000 // Optional timeout for fetch in milliseconds
             });
 
-            console.log(`Attempt ${attempt}: Fetch Response Status:`, response.status);
             if(response.status===504){
                 return false;
             }
@@ -117,39 +116,31 @@ const scraperObject = {
                     uploadedImageResults = await Promise.all(
                         imagesSrc.map(async (src, imageIndex) => {
                             try {
-                                // Kiểm tra nếu src không tồn tại
                                 if (!src) {
-                                    throw new Error(`Image source not found for index: ${imageIndex}`);
+                                    throw new Error(`Không tìm thấy nguồn ảnh tại index: ${imageIndex}`);
                                 }
-
-                                // Fetch image as ArrayBuffer
                                 const arrayBuffer = await fetchWithRetry(src);
-                                if(arrayBuffer===false){
-                                    return null
+                                if (arrayBuffer === false) {
+                                    return null;
                                 }
                                 const buffer = Buffer.from(arrayBuffer);
                                 const base64String = buffer.toString('base64');
                                 const ext = src.split('.').pop().split('?')[0];
-
-                                // Tạo chuỗi base64 đầy đủ
+                            
                                 const fullBase64String = `data:image/${ext};base64,${base64String}`;
                                 const match = fullBase64String.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/);
                                 if (!match) {
-                                   return
+                                    return;
                                 }
-
-                                // Tạo file và lưu vào hệ thống
                                 const imgExt = match[1];
                                 const data = match[2];
                                 const finalBuffer = Buffer.from(data, 'base64');
                                 const uniqueFileName = `chapter_image_${payload.order}_${payload.comic}${imageIndex}_${uuidv4()}.${imgExt}`;
-                                const filePath = path.join(__dirname, uniqueFileName);
-                                fs.writeFileSync(filePath, finalBuffer);
                                 try {
-                                    const url = await upload(uniqueFileName);
-                                    return url
+                                    const url = await upload(uniqueFileName, finalBuffer); // Đảm bảo `upload` có thể xử lý buffer
+                                    return url;
                                 } catch (error) {
-                                    throw new Error("Error uploading")
+                                    throw new Error("Lỗi khi tải lên");
                                 }
                             } catch (error) {
                                 console.error(`Error processing image at index ${imageIndex}:`, error.message);

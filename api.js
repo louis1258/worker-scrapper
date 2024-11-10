@@ -6,45 +6,31 @@ const FormData = require('form-data');
 // API endpoint for uploading the file
 const baseURL = 'http://77.237.236.3:9000/api/upload';
 
-const upload = (image) => {
-    const filePath = path.join(__dirname, image);  // Path to the image file
 
-    // Create a new FormData instance
-    console.log(filePath);
+const upload = async (imageName, fileBuffer) => {
     const formData = new FormData();
-    formData.append('file', fs.createReadStream(filePath));
-    formData.append('type', 'comic_cover'); 
-    // Axios config with headers
+    formData.append('file', fileBuffer, imageName);  // Use the buffer directly and provide the filename
+    formData.append('type', 'comic_cover');
+
     const config = {
         headers: {
             'Content-Type': `multipart/form-data`,  // Axios handles the boundary automatically
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDQ4MDE3NSwiZXhwIjoxNzMzMDcyMTc1fQ.4Ysi9IxH2uIcCcClp11jU2ub1RKewad4PKbeH71vVQA`,  // Add your token here if needed
-            ...formData.getHeaders(),  // Automatically set the multipart headers
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDQ4MDE3NSwiZXhwIjoxNzMzMDcyMTc1fQ.4Ysi9IxH2uIcCcClp11jU2ub1RKewad4PKbeH71vVQA`,  // Token if required
+            ...formData.getHeaders(),  // Automatically set multipart headers
         },
         timeout: 60000
     };
+    try {
+        const response = await axios.post(baseURL, formData, config);
+        console.log('Image uploaded successfully:', response.data);
 
-    // Perform the image upload
-    return axios.post(baseURL, formData, config)
-        .then(response => {
-            console.log('Image uploaded successfully:', response.data);
-
-            // Delete the file after successful upload
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    console.error('Error deleting the file:', err);
-                } else {
-                    console.log(`File ${filePath} deleted successfully.`);
-                }
-            });
-
-            return response.data;  // Return the response data (e.g., URL of the uploaded image)
-        })
-        .catch(error => {
-            console.error('Error uploading image:', error);
-            throw error;  // Rethrow the error to handle it in the calling code
-        });
+        return response.data;  // Return the response data (e.g., URL of the uploaded image)
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;  // Rethrow the error to handle it in the calling code
+    }
 };
+
 
 const COMIC_URL = 'http://77.237.236.3:9000/api/comics';
 const createComic = (comic) => {
