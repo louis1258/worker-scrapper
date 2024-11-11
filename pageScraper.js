@@ -161,7 +161,7 @@ const scraperObject = {
                     comic: `${payload.comic}`,
                     order: `${payload.order}`,
                     title: `Chapter ${payload.order}`,
-                    images: uploadedImageResults.filter(url => url) // Filter out any null results
+                    images: uploadedImageResults // Filter out any null results
                 };
 
                 // Save chapter data to your database or perform any action with it
@@ -194,12 +194,6 @@ const scraperObject = {
                 const task = JSON.parse(message.content.toString()); // Convert string to JSON
                 console.log(`📥 Received task: ${task.chapter}`); // Access the correct href property
                 try {
-                    // Process the task here
-                    const task = {
-                        comic: "672d15e1ee6d10b3326cb0b2",
-                        order: 82,
-                        chapter: "https://truyenqqto.com/truyen-tranh/van-toc-chi-kiep-11198-chap-112.html"
-                    }
                     const currentPageData = await pagePromise(task);
                     scrapedData.push(currentPageData);
                     console.log(`✅ Task completed: ${task.chapter}`);
