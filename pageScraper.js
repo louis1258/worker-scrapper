@@ -109,8 +109,10 @@ const scraperObject = {
                 const imagesSrc = await newPage.$$eval('.page-chapter > img.lazy', images => {
                     return images.map(img => img.src); // Extract 'src' attributes
                 });
-
                 // Process each image source
+                if(imagesSrc.length === 0) {
+                    throw new Error("Không tìm thấy ảnh trong trang");
+                }
                 let uploadedImageResults
                 try {
                     uploadedImageResults = await Promise.all(
@@ -152,7 +154,9 @@ const scraperObject = {
                     console.error("Image upload failed, stopping process:", error.message);
                     throw new Error("failed to upload");
                 }
-
+                if (uploadedImageResults.length === 0) {
+                    throw new Error("Không tải lên được bất kỳ ảnh nào cho chương này.");
+                }
                 const chapterData = {
                     comic: `${payload.comic}`,
                     order: `${payload.order}`,
@@ -191,14 +195,18 @@ const scraperObject = {
                 console.log(`📥 Received task: ${task.chapter}`); // Access the correct href property
                 try {
                     // Process the task here
+                    const task = {
+                        comic: "672d15e1ee6d10b3326cb0b2",
+                        order: 82,
+                        chapter: "https://truyenqqto.com/truyen-tranh/van-toc-chi-kiep-11198-chap-112.html"
+                    }
                     const currentPageData = await pagePromise(task);
                     scrapedData.push(currentPageData);
                     console.log(`✅ Task completed: ${task.chapter}`);
-                    channel.ack(message); // Acknowledge the message after successful processing
+                    channel.ack(message); 
                 } catch (error) {
                     console.error(`❌ Error processing task: ${task.href}`, error);
-                    // Optionally, you can reject the message or handle it as needed
-                    channel.nack(message); // If you want to requeue the message
+                    channel.nack(message); 
                 }
             }
         }, {
