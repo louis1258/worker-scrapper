@@ -84,14 +84,14 @@ const scraperObject = {
 
 
         // Loop through each of those links, open a new page instance, and get the relevant data
-        const newPage = await browser.newPage();
-        // Set API key in request headers
-        await newPage.setExtraHTTPHeaders({
-            'Authorization': `Bearer ${apiKey}`,
-            'Referer': 'https://truyenqqto.com/',
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
-        });
         let pagePromise = async (payload) => {
+            const newPage = await browser.newPage();
+            // Set API key in request headers
+            await newPage.setExtraHTTPHeaders({
+                'Authorization': `Bearer ${apiKey}`,
+                'Referer': 'https://truyenqqto.com/',
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
+            });
             const randomIndex = Math.floor(Math.random() * userAgentList.length);
             userAgentList[randomIndex];
             await newPage.setUserAgent(userAgentList[randomIndex]);
@@ -169,6 +169,7 @@ const scraperObject = {
                 throw new Error("Failed to scrape");
             }
             finally {
+                await newPage.close();
             }
         };
 
