@@ -18,10 +18,12 @@ const upload = async (imageName, fileBuffer) => {
             'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDQ4MDE3NSwiZXhwIjoxNzMzMDcyMTc1fQ.4Ysi9IxH2uIcCcClp11jU2ub1RKewad4PKbeH71vVQA`,  // Token if required
             ...formData.getHeaders(),  // Automatically set multipart headers
         },
-        timeout: 60000
     };
     try {
-        const response = await axios.post(baseURL, formData, config);
+        const instance = axios.create({
+            timeout: 1000000
+          });
+        const response = await instance.post(baseURL, formData, config);
         console.log('Image uploaded successfully:', response.data);
 
         return response.data;  // Return the response data (e.g., URL of the uploaded image)
@@ -38,7 +40,7 @@ const createComic = (comic) => {
         headers: {
             'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDQ4MDE3NSwiZXhwIjoxNzMzMDcyMTc1fQ.4Ysi9IxH2uIcCcClp11jU2ub1RKewad4PKbeH71vVQA`,  // Add your token here if needed
         },
-        timeout: 60000
+        timeout: 1200000
     };
 
     return axios.post(COMIC_URL, comic, config)
@@ -59,7 +61,7 @@ const createChapter = (chapter) => {
         headers: {
             'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDQ4MDE3NSwiZXhwIjoxNzMzMDcyMTc1fQ.4Ysi9IxH2uIcCcClp11jU2ub1RKewad4PKbeH71vVQA`
         },
-        timeout: 60000
+        timeout: 600000
     }
     return axios.post(CHAPTER_URL, chapter, config)
     .then(response => {
@@ -79,7 +81,7 @@ const createComicType = (type) => {
         headers: {
             'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5naGlhLmhvdGhhbmgzMTlAZ21haWwuY29tIiwidXNlcklkIjoiNjZmMTkzYmVlNjY3MTI5MzE5ZDkwYjI1IiwiZW1haWwiOiJuZ2hpYS5ob3RoYW5oMzE5QGdtYWlsLmNvbSIsImlhdCI6MTczMDQ4MDE3NSwiZXhwIjoxNzMzMDcyMTc1fQ.4Ysi9IxH2uIcCcClp11jU2ub1RKewad4PKbeH71vVQA`
         },
-        timeout: 60000
+        timeout: 600000
     }
     return axios.post(COMICTYPE_URL, type, config)
     .then(response => {
