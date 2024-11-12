@@ -4,7 +4,7 @@ const path = require('path');
 const FormData = require('form-data');
 
 // API endpoint for uploading the file
-const baseURL = 'http://212.56.47.92:9001/api/upload';
+const baseURL = 'http://212.56.47.95:9001/api/upload';
 
 
 const upload = async (imageName, fileBuffer) => {
@@ -34,7 +34,7 @@ const upload = async (imageName, fileBuffer) => {
 };
 
 
-const COMIC_URL = 'http://212.56.47.92:9001/api/comics';
+const COMIC_URL = 'http://212.56.47.95:9001/api/comics';
 const createComic = (comic) => {
     const config = {
         headers: {
@@ -55,7 +55,7 @@ const createComic = (comic) => {
 }
 
 
-const CHAPTER_URL = 'http://212.56.47.92:9001/api/chapters';
+const CHAPTER_URL = 'http://212.56.47.95:9001/api/chapters';
 const createChapter = (chapter) => {
     const config = {
         headers: {
@@ -75,7 +75,7 @@ const createChapter = (chapter) => {
 
 
 
-const COMICTYPE_URL = 'http://212.56.47.92:9001/api/comic-types/findName';
+const COMICTYPE_URL = 'http://212.56.47.95:9001/api/comic-types/findName';
 const createComicType = (type) => {
     const config = {
         headers: {
