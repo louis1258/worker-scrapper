@@ -13,10 +13,10 @@ const randomDelay = async (min = 500, max = 1500) => {
     return new Promise((resolve) => setTimeout(resolve, delay));
 };
 const userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
-const proxyUrl = 'hndc2.proxyxoay.net:58132';  // Replace with your actual proxy URL and port
+const proxyUrl = 'hndc41.proxyxoay.net:18954';  // Replace with your actual proxy URL and port
 const proxyUsername = 'louis1258';
 const proxyPassword = 'Htn@1258';
-const apiKey = '1be32bda-dda5-4817-8e59-56548fbe43f4';
+const apiKey = 'bacfad1f-292e-4b55-a1f7-b712d67ecb28';
 const userAgentList = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
